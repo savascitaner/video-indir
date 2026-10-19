@@ -94,6 +94,21 @@ Kestirmeler uygulamasını aç → sağ üstteki **+** → üstteki adı **Video
      albüm **Son Öğeler** (Recents).
 6. **Eğer Sonu**'nun altına **Bildirim Göster**: `Kaydedildi ✅`
 
+### 5. Güncelleme kontrolü (isteğe bağlı ama önerilir)
+
+Bu adımlar, GitHub'a yeni sürüm koyduğunda kestirmenin bunu fark edip güncellemeyi önermesini sağlar.
+Ayarlar bölümünün hemen altına (Değişken Ayarla `Anahtar`'dan sonra) şunları ekle:
+
+1. **URL'nin İçeriklerini Al**: `[Sunucu]/surum` → **Değişken Ayarla** `SurumBilgi`.
+2. **Sözlük Değerini Al**: `surum` anahtarı, kaynak `SurumBilgi` → **Değişken Ayarla** `SonSurum`.
+3. **Eğer** `SonSurum` **şundan büyük** (is greater than) `1`
+   (bu sayı, kestirmenin kendi sürümüdür; `kestirme/surum.json`'daki `surum` ile aynı olmalı).
+4. Eğer bloğunun içine **Menüden Seç** (Choose from Menu): başlık `Yeni sürüm var. Güncellensin mi?`,
+   seçenekler `Güncelle` ve `Şimdi değil`.
+5. `Güncelle` altına: **Sözlük Değerini Al** `link` (kaynak `SurumBilgi`) → **URL'leri Aç** (Open URLs)
+   → **Bu Kestirmeyi Durdur** (Stop This Shortcut).
+6. `Şimdi değil` altını boş bırak.
+
 Bitti. İlk çalıştırmada iOS, sunucuya bağlanmak ve Fotoğraflar'a kaydetmek için izin isteyecek;
 **Her Zaman İzin Ver** de.
 
@@ -102,6 +117,7 @@ Bitti. İlk çalıştırmada iOS, sunucuya bağlanmak ve Fotoğraflar'a kaydetme
 ```
 Metin (sunucu adresi)            → Sunucu
 Metin (API anahtarı)             → Anahtar
+URL'nin İçeriklerini Al  GET [Sunucu]/surum → surum > bu sürüm ise: Güncelle / Şimdi değil
 Kestirme Girdisi (yoksa: Pano)
 Girdiden URL'leri Al → İlk Öğe → URL Kodla → Link
 URL'nin İçeriklerini Al  GET [Sunucu]/secenekler?url=[Link]   (X-API-Key)   → Bilgi

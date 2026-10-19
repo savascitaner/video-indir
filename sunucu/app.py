@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import tempfile
 import unicodedata
+import urllib.request
 
 from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Query
 from fastapi.responses import FileResponse
@@ -22,6 +23,12 @@ API_KEY = os.environ.get("API_KEY", "")
 COOKIES_FILE = os.environ.get("COOKIES_FILE", "")
 # Bu sürenin (saniye) üzerindeki videolar reddedilir; 0 = sınırsız.
 MAX_SURE = int(os.environ.get("MAX_SURE", "0"))
+# Kestirmenin güncel sürüm bilgisi. Repo gizliyse okuma izni olan bir GITHUB_TOKEN gerekir.
+GUNCELLEME_URL = os.environ.get(
+    "GUNCELLEME_URL",
+    "https://api.github.com/repos/savascitaner/video-indir/contents/kestirme/surum.json?ref=main",
+)
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 
 SADECE_SES = "Sadece ses"
 EN_IYI = "En iyi"
@@ -123,6 +130,21 @@ def _dosya_adi(baslik: str, uzanti: str) -> str:
 @app.get("/saglik")
 def saglik() -> dict:
     return {"durum": "ok"}
+
+
+@app.get("/surum")
+def surum() -> dict:
+    """Kestirmenin GitHub'daki son sürümü: {"surum": 2, "link": "...", "notlar": "..."}.
+    Okunamazsa {"surum": 0} döner ve kestirme güncelleme önermez."""
+    istek = urllib.request.Request(GUNCELLEME_URL, headers={"Accept": "application/vnd.github.raw+json"})
+    if GITHUB_TOKEN:
+        istek.add_header("Authorization", f"Bearer {GITHUB_TOKEN}")
+    try:
+        with urllib.request.urlopen(istek, timeout=5) as yanit:
+            bilgi = json.loads(yanit.read())
+        return {"surum": int(bilgi.get("surum", 0)), "link": bilgi.get("link", ""), "notlar": bilgi.get("notlar", "")}
+    except (OSError, ValueError, AttributeError):
+        return {"surum": 0, "link": "", "notlar": ""}
 
 
 @app.get("/secenekler")

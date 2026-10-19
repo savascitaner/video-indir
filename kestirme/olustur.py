@@ -8,11 +8,16 @@ iPhone yalnızca imzalı kestirmeleri içe aktarır. İmzalamak için bir Mac'te
 GitHub Actions bu iki adımı otomatik yapar (.github/workflows/kestirme.yml).
 """
 
+import json
+import pathlib
 import plistlib
 import sys
 import uuid
 
-YER = "￼"  # Kestirmeler metinlerinde değişkenin yerini tutan karakter
+# Kestirmenin sürümü kestirme/surum.json'dan gelir; GitHub'daki daha büyükse kestirme güncelleme önerir.
+SURUM = json.loads((pathlib.Path(__file__).parent / "surum.json").read_text(encoding="utf-8"))["surum"]
+
+YER = "\ufffc"  # Kestirmeler metinlerinde değişkenin yerini tutan karakter
 
 
 def degisken(ad: str) -> dict:
@@ -93,14 +98,33 @@ def istek(*url_parcalari) -> dict:
 
 
 def eylemler() -> list[dict]:
-    kosul = str(uuid.uuid4()).upper()
+    kosul, surum_kosulu, menu = (str(uuid.uuid4()).upper() for _ in range(3))
     return zincir(
         # 0-3: Ayarlar (içe aktarırken sorulur)
         eylem("gettext", WFTextActionText="http://"),
         "Sunucu",
         eylem("gettext", WFTextActionText=""),
         "Anahtar",
-        # 4-8: Link (paylaş menüsü; yoksa pano)
+        # Güncelleme kontrolü: GitHub'daki surum.json bu kestirmeden yeniyse güncellemeyi öner
+        istek(degisken("Sunucu"), "/surum"),
+        "SurumBilgi",
+        eylem("getvalueforkey", WFInput=ek(degisken("SurumBilgi")), WFGetDictionaryValueType="Value",
+              WFDictionaryKey="surum"),
+        "SonSurum",
+        eylem("conditional", GroupingIdentifier=surum_kosulu, WFControlFlowMode=0, WFCondition=2,
+              WFInput={"Type": "Variable", "Variable": ek(degisken("SonSurum"))}, WFNumberValue=str(SURUM)),
+        eylem("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=0,
+              WFMenuPrompt="Video İndir'in yeni sürümü var. Güncellensin mi?", WFMenuItems=["Güncelle", "Şimdi değil"]),
+        eylem("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=1, WFMenuItemTitle="Güncelle"),
+        eylem("getvalueforkey", WFInput=ek(degisken("SurumBilgi")), WFGetDictionaryValueType="Value",
+              WFDictionaryKey="link"),
+        "GuncellemeLinki",
+        eylem("openurl", WFInput=ek(degisken("GuncellemeLinki"))),
+        eylem("exit"),
+        eylem("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=1, WFMenuItemTitle="Şimdi değil"),
+        eylem("choosefrommenu", GroupingIdentifier=menu, WFControlFlowMode=2),
+        eylem("conditional", GroupingIdentifier=surum_kosulu, WFControlFlowMode=2),
+        # Link (paylaş menüsü; yoksa pano)
         eylem("detect.link", WFInput=ek({"Type": "ExtensionInput"})),
         eylem("getitemfromlist", WFItemSpecifier="First Item"),
         "HamLink",

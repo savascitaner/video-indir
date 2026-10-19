@@ -76,6 +76,8 @@ Fotoğraflar'a kaydeder. `Sadece ses` seçilirse `.m4a` dosyası Dosyalar uygula
 | `API_KEY` | Kestirmenin `X-API-Key` başlığında göndereceği gizli anahtar. Boş bırakılırsa sunucu herkese açık olur, **önerilmez**. |
 | `COOKIES_FILE` | İsteğe bağlı. Giriş gerektiren videolar (Instagram, gizli X hesapları, yaş sınırlı YouTube) için Netscape biçiminde çerez dosyası yolu. |
 | `MAX_SURE` | İsteğe bağlı. Bu süreden (saniye) uzun videoları reddeder. `0` = sınırsız. |
+| `GITHUB_TOKEN` | Güncelleme kontrolü için. Repo **gizliyse** gerekir: GitHub → Settings → Developer settings → Fine-grained tokens, yalnızca bu repo, *Contents: Read-only*. Repo herkese açıksa boş bırak. |
+| `GUNCELLEME_URL` | İsteğe bağlı. Sürüm bilgisinin okunacağı adres; varsayılanı bu repodaki `kestirme/surum.json`. |
 
 ### Çerez dosyası (Instagram / X giriş hatası)
 
@@ -93,10 +95,28 @@ Tüm isteklerde `X-API-Key: <API_KEY>` başlığı (ya da `?anahtar=<API_KEY>` p
 | İstek | Ne yapar |
 |---|---|
 | `GET /saglik` | Sunucu ayakta mı? (`{"durum":"ok"}`) |
+| `GET /surum` | GitHub'daki `kestirme/surum.json` içeriği (anahtar istemez). Kestirme her açılışta buna bakar. |
 | `GET /secenekler?url=<link>` | `{"baslik", "sure", "cozunurlukler": ["1080p", …, "Sadece ses"], "ses_secenekleri": [...]}` |
 | `GET /indir?url=<link>&kalite=720p&ses=Orta (128 kbps)` | Videoyu MP4 (ya da `kalite=Sadece ses` ise M4A) olarak döndürür. |
 
 `kalite` için `720p` gibi bir çözünürlük, `En iyi` ya da `Sadece ses`; `ses` için `Yüksek`, `Orta` veya `Düşük` verilebilir.
+
+## Kestirmeyi güncelleme (yeni sürüm yayınlama)
+
+Kestirme her çalıştığında sunucu üzerinden GitHub'daki `kestirme/surum.json` dosyasına bakar. Oradaki `surum`
+numarası kendi numarasından büyükse "Yeni sürüm var. Güncellensin mi?" diye sorar; **Güncelle** dersen
+`link` adresini açar, iPhone da yeni kestirmeyi eskisinin **yerine** koymayı önerir (**Değiştir** de).
+
+Yeni sürüm yayınlamak için:
+
+1. Kestirmede değişikliği yap (`kestirme/olustur.py` ya da iPhone'da elle) ve `kestirme/surum.json`'daki
+   `surum` değerini bir artır (ör. `1` → `2`).
+2. Yeni kestirmeyi iPhone'una ekle (Mac'te imzalayıp AirDrop ile ya da elle) ve
+   **Paylaş → iCloud Bağlantısını Kopyala** ile linkini al.
+3. Bu linki `surum.json`'daki `link` alanına yaz, istersen `notlar`'a ne değiştiğini yaz.
+4. `surum.json`'u GitHub'a gönder (main dalı). Bütün iPhone'lar bir sonraki çalıştırmada güncellemeyi görür.
+
+`surum` ve `link`'i aynı anda değiştir: link eklenmeden numara artarsa kestirme açamayacağı bir güncelleme önerir.
 
 ## Bakım
 
