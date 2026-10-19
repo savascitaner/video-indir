@@ -1,0 +1,51 @@
+name: Kestirmeyi imzala
+
+# iPhone yalnızca imzalı kestirmeleri içe aktarır; imzalama yalnızca macOS'ta yapılabilir.
+on:
+  push:
+    branches: [main]
+    paths: ["kestirme/**", ".github/workflows/kestirme.yml"]
+  pull_request:
+    paths: ["kestirme/**", ".github/workflows/kestirme.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  imzala:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Kestirmeyi oluştur
+        run: python3 kestirme/olustur.py imzasiz.shortcut
+
+      - name: Biçimi denetle
+        run: plutil -lint imzasiz.shortcut
+
+      # GitHub'ın Mac makinelerinde iCloud oturumu olmadığından imzalama genelde burada başarısız olur;
+      # o durumda imzasız dosya yüklenir ve README'deki "Mac'te imzala" adımı uygulanır.
+      - name: İmzala
+        id: imza
+        run: |
+          if shortcuts sign --mode anyone --input imzasiz.shortcut --output Video-Indir.shortcut; then
+            echo "imzali=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Kestirme imzalanamadı (iCloud oturumu yok). İmzasız dosya yükleniyor."
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Video-Indir-kestirme
+          path: "*.shortcut"
+
+      - name: "\"kestirme\" sürümüne yükle"
+        if: github.event_name != 'pull_request' && steps.imza.outputs.imzali == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view kestirme >/dev/null 2>&1 || \
+            gh release create kestirme --title "Video İndir kestirmesi" \
+              --notes "iPhone'da bu sayfadan Video-Indir.shortcut dosyasına dokunarak kestirmeyi ekle."
+          gh release upload kestirme Video-Indir.shortcut --clobber

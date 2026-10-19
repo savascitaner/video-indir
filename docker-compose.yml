@@ -1,0 +1,11 @@
+services:
+  video-indir:
+    build: ./sunucu
+    ports:
+      - "8000:8000"
+    env_file: .env
+    restart: unless-stopped
+    # Instagram/X için çerez dosyası kullanacaksan aşağıdaki satırları aç
+    # ve .env içinde COOKIES_FILE=/cerez/cookies.txt yaz.
+    # volumes:
+    #   - ./cookies.txt:/cerez/cookies.txt:ro
