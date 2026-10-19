@@ -7,6 +7,23 @@ erişilebilmesi gerekir (tarayıcıda `https://SUNUCU-ADRESİN/saglik` açınca 
 > Eylem adları iOS 17/18 Türkçe arayüzüne göre yazıldı; parantez içinde İngilizce karşılıkları var.
 > Eylem eklemek için kestirme düzenleyicide alttaki arama kutusuna adını yazman yeterli.
 
+## Hazır dosyayla kurulum (Mac gerekir)
+
+iPhone yalnızca Apple'ın imzaladığı kestirme dosyalarını içe aktarır ve imzalama yalnızca iCloud'a giriş
+yapılmış bir Mac'te yapılabilir. Mac'in varsa elle kurmana gerek yok:
+
+```sh
+git clone https://github.com/savascitaner/video-indir.git && cd video-indir
+python3 kestirme/olustur.py imzasiz.shortcut
+shortcuts sign --mode anyone --input imzasiz.shortcut --output "Video İndir.shortcut"
+```
+
+`Video İndir.shortcut` dosyasını AirDrop ile iPhone'una gönder ve aç. İçe aktarırken iPhone senden
+**sunucu adresini** ve **API anahtarını** isteyecek; ikisini de gir, bitti.
+
+Mac'in yoksa kestirmeyi aşağıdaki adımlarla bir kez elle kur. Sonra kestirmede **Paylaş → iCloud Bağlantısını
+Kopyala** diyerek başka iPhone'lara tek dokunuşla eklenebilen bir link de alabilirsin.
+
 ## Kestirme nasıl çalışacak?
 
 1. YouTube / Instagram / X uygulamasında **Paylaş → Video İndir**'e dokunursun

@@ -58,7 +58,8 @@ engellendiği için çerez dosyası (aşağıda) gerekebilir.
 
 ### 2. Kestirmeyi iPhone'a ekle
 
-Adım adım rehber: **[kestirme/KURULUM.md](kestirme/KURULUM.md)**
+Rehber: **[kestirme/KURULUM.md](kestirme/KURULUM.md)**. Mac'in varsa hazır `.shortcut` dosyasını tek komutla
+üretip AirDrop ile gönderebilirsin; yoksa kestirmeyi adım adım bir kez elle kurarsın.
 
 ### 3. Kullan
 
