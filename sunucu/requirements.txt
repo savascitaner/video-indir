@@ -1,0 +1,6 @@
+# yt-dlp sitelerdeki değişikliklere ayak uydurmak için sık güncellenir; sabitlemiyoruz.
+yt-dlp[default]
+fastapi>=0.115
+uvicorn>=0.30
+# yt-dlp'nin YouTube'daki JavaScript doğrulamalarını çözebilmesi için gerekli
+deno
